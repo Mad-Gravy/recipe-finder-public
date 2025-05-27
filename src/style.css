@@ -1,0 +1,146 @@
+/* Joseph Teague, 5/24/2025
+CS 233JS, Term Project "Recipe Finder" */
+
+/* Background and fonts */
+body {
+  background: linear-gradient(180deg, #0b0223, #1b0036);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #e0e0e0;
+}
+
+/* Header */
+h1 {
+  color: #00f7ff;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Ingredient input row */
+#ingredient-form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+#ingredient-input {
+  background-color: transparent;
+  border: 2px solid #ff00cc;
+  color: #fff;
+  padding: 10px;
+  border-radius: 20px;
+  width: 300px;
+}
+
+#ingredient-input::placeholder {
+  color: #999;
+}
+
+button {
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: bold;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+#ingredient-form button {
+  background: #ff00cc;
+  color: #fff;
+  border: 2px solid #ff00cc;
+}
+
+#ingredient-form button:hover {
+  background: transparent;
+  color: #ff00cc;
+}
+
+/* Ingredient badges */
+#ingredient-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+#ingredient-list span {
+  background: #5c007a;
+  color: #00f7ff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  border: 1px solid #00f7ff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#ingredient-list span:hover {
+  background: #00f7ff;
+  color: #1b0036;
+}
+
+/* Find Recipes button */
+#find-recipes {
+  background: linear-gradient(90deg, #ff00cc, #3333ff);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 24px;
+  margin-bottom: 2rem;
+  transition: 0.3s;
+}
+
+#find-recipes:hover {
+  opacity: 0.85;
+}
+
+/* Recipe Cards */
+.card {
+  background: #140036;
+  border: 2px solid #220044;
+  border-radius: 16px;
+  color: #fff;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card-title {
+  color: #00f7ff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card img {
+  border-radius: 0;
+  object-fit: cover;
+  height: 180px;
+  width: 100%;
+}
+
+.card a {
+  background-color: #ff00cc;
+  border: none;
+  color: white;
+  border-radius: 20px;
+  padding: 8px;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.card a:hover {
+  background-color: #e600b3;
+}
