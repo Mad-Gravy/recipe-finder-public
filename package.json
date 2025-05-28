@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "watch": "webpack serve --mode development --open",
-    "build": "webpack --mode production"
+    "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
+    "html-webpack-plugin": "^5.5.0",
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.0",
