@@ -17,6 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const stored = localStorage.getItem('ingredients');
   if (stored) {
     ingredients = JSON.parse(stored);
+    ingredientList.innerHTML = '';
     ingredients.forEach(displayIngredient);
   }
 });
@@ -77,7 +78,13 @@ findRecipesBtn.addEventListener('click', async () => {
   if (ingredients.length === 0) return alert('Please add ingredients!');
   const searcher = new RecipeSearcher(ingredients, requiredIngredients);
   const recipes = await searcher.fetchRecipes();
-  displayRecipes(recipes);
+
+if (requiredIngredients.length === 0) { //e.g. is not using ComplexSearch
+  // Will only sort when using findByIngredients endpoint
+  recipes.sort((a, b) => (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0));
+}
+
+displayRecipes(recipes);
 });
 
 function displayRecipes(meals) {
@@ -97,6 +104,7 @@ function displayRecipes(meals) {
     const img = document.createElement('img');
     img.src = meal.image;
     img.className = 'card-img-top';
+    img.alt = meal.title;
 
     const body = document.createElement('div');
     body.className = 'card-body d-flex flex-column';
@@ -105,6 +113,17 @@ function displayRecipes(meals) {
     title.className = 'card-title';
     title.textContent = meal.title;
 
+    const missingInfo = document.createElement('p');
+    missingInfo.className = 'card-text text-danger';
+    if (meal.missedIngredients && meal.missedIngredients.length > 0) {
+      const missingList = meal.missedIngredients.map(ing => ing.name).join(', ');
+      missingInfo.textContent = `Missing: ${missingList}`;
+    } else {
+      missingInfo.textContent = 'You have all the ingredients!';
+      missingInfo.classList.remove('text-danger');
+      missingInfo.classList.add('text-success');
+    }
+
     const link = document.createElement('a');
     link.href = `https://spoonacular.com/recipes/${meal.title.replaceAll(' ', '-')}-${meal.id}`;
     link.target = '_blank';
@@ -112,6 +131,7 @@ function displayRecipes(meals) {
     link.textContent = 'View Recipe';
 
     body.appendChild(title);
+    body.appendChild(missingInfo);
     body.appendChild(link);
     card.appendChild(img);
     card.appendChild(body);
