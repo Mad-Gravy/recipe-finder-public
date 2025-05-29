@@ -34,12 +34,30 @@ ingredientForm.addEventListener('submit', (e) => {
 
 function displayIngredient(ingredient) {
   const badge = document.createElement('span');
-  badge.className = 'badge rounded-pill bg-info text-dark m-1';
-  badge.textContent = ingredient;
-  badge.title = 'Click to toggle required / right-click to remove';
+  badge.className = 'badge rounded-pill bg-info text-dark m-1 d-flex align-items-center';
+  badge.title = 'Click to toggle required';
   badge.dataset.ingredient = ingredient;
 
-  // Click to toggle "required"
+  const text = document.createElement('span');
+  text.textContent = ingredient;
+  text.classList.add('me-2');
+  badge.appendChild(text);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn-close btn-close-white btn-sm ms-auto';
+  closeBtn.setAttribute('aria-label', 'Remove');
+  closeBtn.style.filter = 'invert(1)';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent toggle behavior
+    ingredients = ingredients.filter(i => i !== ingredient);
+    requiredIngredients = requiredIngredients.filter(i => i !== ingredient);
+    localStorage.setItem('ingredients', JSON.stringify(ingredients));
+    badge.remove();
+  });
+
+  badge.appendChild(closeBtn);
+
+  // Toggle required on click
   badge.addEventListener('click', () => {
     if (requiredIngredients.includes(ingredient)) {
       requiredIngredients = requiredIngredients.filter(i => i !== ingredient);
@@ -50,15 +68,6 @@ function displayIngredient(ingredient) {
       badge.classList.remove('bg-info');
       badge.classList.add('bg-danger');
     }
-  });
-
-  // Right-click to remove
-  badge.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    ingredients = ingredients.filter(i => i !== ingredient);
-    requiredIngredients = requiredIngredients.filter(i => i !== ingredient);
-    localStorage.setItem('ingredients', JSON.stringify(ingredients));
-    badge.remove();
   });
 
   ingredientList.appendChild(badge);

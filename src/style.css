@@ -1,16 +1,13 @@
-/* Joseph Teague, 5/24/2025
-CS 233JS, Term Project "Recipe Finder" */
-
 /* Background and fonts */
 body {
-  background: linear-gradient(180deg, #0b0223, #1b0036);
+  background: linear-gradient(180deg, #dcc7c7, #e0f7fa);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #e0e0e0;
+  color: #333;
 }
 
 /* Header */
 h1 {
-  color: #00f7ff;
+  color: #3bc102;
   text-align: center;
   font-weight: bold;
   margin-bottom: 1rem;
@@ -25,16 +22,16 @@ h1 {
 }
 
 #ingredient-input {
-  background-color: transparent;
-  border: 2px solid #ff00cc;
-  color: #fff;
+  background-color: #ffffff;
+  border: 2px solid #007acc;
+  color: #333;
   padding: 10px;
   border-radius: 20px;
   width: 300px;
 }
 
 #ingredient-input::placeholder {
-  color: #999;
+  color: #888;
 }
 
 button {
@@ -46,14 +43,14 @@ button {
 }
 
 #ingredient-form button {
-  background: #ff00cc;
+  background: #007acc;
   color: #fff;
-  border: 2px solid #ff00cc;
+  border: 2px solid #007acc;
 }
 
 #ingredient-form button:hover {
   background: transparent;
-  color: #ff00cc;
+  color: #007acc;
 }
 
 /* Ingredient badges */
@@ -66,24 +63,30 @@ button {
 }
 
 #ingredient-list span {
-  background: #5c007a;
-  color: #00f7ff;
+  background: #e3f2fd;
+  color: #007acc;
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 0.9rem;
-  border: 1px solid #00f7ff;
+  border: 1px solid #007acc;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, color 0.3s;
 }
 
 #ingredient-list span:hover {
-  background: #00f7ff;
-  color: #1b0036;
+  background: #007acc;
+  color: #fff;
+}
+
+#ingredient-list span::after {
+  content: attr(data-state);
+  margin-left: 8px;
+  font-weight: bold;
 }
 
 /* Find Recipes button */
 #find-recipes {
-  background: linear-gradient(90deg, #ff00cc, #3333ff);
+  background: #007acc;
   color: white;
   font-weight: bold;
   border: none;
@@ -94,15 +97,15 @@ button {
 }
 
 #find-recipes:hover {
-  opacity: 0.85;
+  background: #005f99;
 }
 
 /* Recipe Cards */
 .card {
-  background: #140036;
-  border: 2px solid #220044;
+  background: #ffffff;
+  border: 1px solid #ccc;
   border-radius: 16px;
-  color: #fff;
+  color: #333;
   overflow: hidden;
   transition: transform 0.3s;
 }
@@ -112,7 +115,7 @@ button {
 }
 
 .card-title {
-  color: #00f7ff;
+  color: #007acc;
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -131,7 +134,7 @@ button {
 }
 
 .card a {
-  background-color: #ff00cc;
+  background-color: #007acc;
   border: none;
   color: white;
   border-radius: 20px;
@@ -142,5 +145,5 @@ button {
 }
 
 .card a:hover {
-  background-color: #e600b3;
+  background-color: #005f99;
 }
