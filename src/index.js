@@ -4,138 +4,127 @@
 import './style.css';
 import RecipeSearcher from './recipeSearcher';
 
-const ingredientForm = document.getElementById('ingredient-form');
-const ingredientInput = document.getElementById('ingredient-input');
-const ingredientList = document.getElementById('ingredient-list');
-const findRecipesBtn = document.getElementById('find-recipes');
-const recipesSection = document.getElementById('recipes');
+const input = document.getElementById('ingredient-input');
+const addBtn = document.getElementById('add-ingredient');
+const ingredientsList = document.getElementById('ingredients-list');
+const searchBtn = document.getElementById('search-btn');
+const resultsContainer = document.getElementById('results');
+const autocompleteResults = document.getElementById('autocomplete-results');
 
-let ingredients = []; // all ingredients
-let requiredIngredients = []; // subset of ingredients marked as "required"
+let ingredients = JSON.parse(localStorage.getItem('ingredients')) || [];
 
-window.addEventListener('DOMContentLoaded', () => {
-  const stored = localStorage.getItem('ingredients');
-  if (stored) {
-    ingredients = JSON.parse(stored);
-    ingredientList.innerHTML = '';
-    ingredients.forEach(displayIngredient);
-  }
-});
+// Re-render saved ingredients on page load
+ingredients.forEach(renderIngredientPill);
 
-ingredientForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const ingredient = ingredientInput.value.trim().toLowerCase();
-  if (ingredient && !ingredients.includes(ingredient)) {
-    ingredients.push(ingredient);
-    localStorage.setItem('ingredients', JSON.stringify(ingredients));
-    displayIngredient(ingredient);
-    ingredientInput.value = '';
-  }
-});
+// Event listeners
+addBtn.addEventListener('click', handleAddIngredient);
+searchBtn.addEventListener('click', handleSearch);
+input.addEventListener('keyup', handleAutocomplete);
 
-function displayIngredient(ingredient) {
-  const badge = document.createElement('span');
-  badge.className = 'badge rounded-pill bg-info text-dark m-1 d-flex align-items-center';
-  badge.title = 'Click to toggle required';
-  badge.dataset.ingredient = ingredient;
+// Add ingredient to list
+function handleAddIngredient() {
+  const ingredient = input.value.trim().toLowerCase();
+  if (!ingredient || ingredients.includes(ingredient)) return;
 
-  const text = document.createElement('span');
-  text.textContent = ingredient;
-  text.classList.add('me-2');
-  badge.appendChild(text);
+  ingredients.push(ingredient);
+  ingredients = [...new Set(ingredients)];
+  localStorage.setItem('ingredients', JSON.stringify(ingredients));
+  renderIngredientPill(ingredient);
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'btn-close btn-close-white btn-sm ms-auto';
-  closeBtn.setAttribute('aria-label', 'Remove');
-  closeBtn.style.filter = 'invert(1)';
-  closeBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // prevent toggle behavior
-    ingredients = ingredients.filter(i => i !== ingredient);
-    requiredIngredients = requiredIngredients.filter(i => i !== ingredient);
-    localStorage.setItem('ingredients', JSON.stringify(ingredients));
-    badge.remove();
-  });
-
-  badge.appendChild(closeBtn);
-
-  // Toggle required on click
-  badge.addEventListener('click', () => {
-    if (requiredIngredients.includes(ingredient)) {
-      requiredIngredients = requiredIngredients.filter(i => i !== ingredient);
-      badge.classList.remove('bg-danger');
-      badge.classList.add('bg-info');
-    } else {
-      requiredIngredients.push(ingredient);
-      badge.classList.remove('bg-info');
-      badge.classList.add('bg-danger');
-    }
-  });
-
-  ingredientList.appendChild(badge);
+  input.value = '';
+  autocompleteResults.innerHTML = '';
 }
 
-findRecipesBtn.addEventListener('click', async () => {
-  if (ingredients.length === 0) return alert('Please add ingredients!');
-  const searcher = new RecipeSearcher(ingredients, requiredIngredients);
-  const recipes = await searcher.fetchRecipes();
-
-if (requiredIngredients.length === 0) { //e.g. is not using ComplexSearch
-  // Will only sort when using findByIngredients endpoint
-  recipes.sort((a, b) => (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0));
-}
-
-displayRecipes(recipes);
-});
-
-function displayRecipes(meals) {
-  recipesSection.innerHTML = '';
-  if (!meals || meals.length === 0) {
-    recipesSection.innerHTML = '<p class="text-center">No recipes found.</p>';
+// Render autocomplete suggestions
+async function handleAutocomplete() {
+  const query = input.value.trim();
+  if (query.length < 2) {
+    autocompleteResults.innerHTML = '';
     return;
   }
 
+  try {
+    const res = await fetch(`https://${process.env.RAPIDAPI_HOST}/food/ingredients/autocomplete?query=${query}&number=5`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+        'x-rapidapi-host': process.env.RAPIDAPI_HOST
+      }
+    });
+    const suggestions = await res.json();
+    renderAutocompleteList(suggestions);
+  } catch (err) {
+    console.error('Autocomplete error:', err);
+  }
+}
+
+// Display autocomplete results
+function renderAutocompleteList(suggestions) {
+  autocompleteResults.innerHTML = '';
+  suggestions.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item.name;
+    li.className = 'list-group-item list-group-item-action';
+    li.addEventListener('click', () => {
+      input.value = item.name;
+      autocompleteResults.innerHTML = '';
+    });
+    autocompleteResults.appendChild(li);
+  });
+}
+
+// Display ingredient as a pill
+function renderIngredientPill(name) {
+  const pill = document.createElement('span');
+  pill.className = 'badge bg-primary m-1';
+  pill.textContent = name;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = '×';
+  removeBtn.className = 'btn-close btn-close-white ms-2';
+  removeBtn.style.fontSize = '0.6rem';
+  removeBtn.addEventListener('click', () => {
+    ingredients = ingredients.filter(i => i !== name);
+    localStorage.setItem('ingredients', JSON.stringify(ingredients));
+    pill.remove();
+  });
+
+  pill.appendChild(removeBtn);
+  ingredientsList.appendChild(pill);
+}
+
+// Search for recipes
+async function handleSearch() {
+  resultsContainer.innerHTML = '<p>Searching for recipes...</p>';
+  const searcher = new RecipeSearcher(ingredients);
+  const meals = await searcher.fetchRecipes();
+
+  resultsContainer.innerHTML = '';
+  if (!meals || meals.length === 0) {
+    resultsContainer.innerHTML = '<p>No recipes found. Try adding more ingredients!</p>';
+    return;
+  }
+
+  meals.sort((a, b) => (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0));
+
   meals.forEach(meal => {
-    const col = document.createElement('div');
-    col.className = 'col-md-3';
-
     const card = document.createElement('div');
-    card.className = 'card h-100';
-
-    const img = document.createElement('img');
-    img.src = meal.image;
-    img.className = 'card-img-top';
-    img.alt = meal.title;
-
-    const body = document.createElement('div');
-    body.className = 'card-body d-flex flex-column';
-
-    const title = document.createElement('h5');
-    title.className = 'card-title';
-    title.textContent = meal.title;
-
-    const missingInfo = document.createElement('p');
-    missingInfo.className = 'card-text text-danger';
-    if (meal.missedIngredients && meal.missedIngredients.length > 0) {
-      const missingList = meal.missedIngredients.map(ing => ing.name).join(', ');
-      missingInfo.textContent = `Missing: ${missingList}`;
-    } else {
-      missingInfo.textContent = 'You have all the ingredients!';
-      missingInfo.classList.remove('text-danger');
-      missingInfo.classList.add('text-success');
-    }
-
-    const link = document.createElement('a');
-    link.href = `https://spoonacular.com/recipes/${meal.title.replaceAll(' ', '-')}-${meal.id}`;
-    link.target = '_blank';
-    link.className = 'btn btn-outline-light mt-auto';
-    link.textContent = 'View Recipe';
-
-    body.appendChild(title);
-    body.appendChild(missingInfo);
-    body.appendChild(link);
-    card.appendChild(img);
-    card.appendChild(body);
-    col.appendChild(card);
-    recipesSection.appendChild(col);
+    card.className = 'card mb-3';
+    card.innerHTML = `
+      <div class="row g-0">
+        <div class="col-md-4">
+          <img src="${meal.image}" class="img-fluid rounded-start" alt="${meal.title}">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title">${meal.title}</h5>
+            <p class="card-text">Missing ingredients: ${meal.missedIngredientCount || 0}</p>
+            ${meal.missedIngredients ? `<ul>${meal.missedIngredients.map(i => `<li>${i.name}</li>`).join('')}</ul>` : ''}
+            <a href="https://spoonacular.com/recipes/${meal.title.replace(/ /g, '-')}-${meal.id}" class="btn btn-success" target="_blank">View Recipe</a>
+          </div>
+        </div>
+      </div>
+    `;
+    resultsContainer.appendChild(card);
   });
 }
