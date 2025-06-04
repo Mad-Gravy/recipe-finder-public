@@ -104,9 +104,10 @@ async function handleSearch() {
     resultsContainer.innerHTML = '<p>No recipes found. Try adding more ingredients!</p>';
     return;
   }
-
+  // Sort recipes by least to most missing ingredients
   meals.sort((a, b) => (a.missedIngredientCount || 0) - (b.missedIngredientCount || 0));
 
+  // Generate search results as recipe cards
   meals.forEach(meal => {
     const card = document.createElement('div');
     card.className = 'card mb-3';
