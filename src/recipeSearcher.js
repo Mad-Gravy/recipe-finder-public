@@ -1,6 +1,8 @@
 // Joseph Teague, 5/24/2025
 // CS 233JS, Term Project "Recipe Finder"
 
+
+// Recipe finding by ingredients AJAX logic
 export default class RecipeSearcher {
   constructor(ingredients) {
     this.ingredients = ingredients;
@@ -30,4 +32,15 @@ export default class RecipeSearcher {
       return [];
     }
   }
+}
+// Autocomplete AJAX logic
+export async function fetchAutocompleteSuggestions(query, apiKey, apiHost) {
+  const res = await fetch(`https://${apiHost}/food/ingredients/autocomplete?query=${query}&number=5`, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': apiHost
+    }
+  });
+  return await res.json();
 }

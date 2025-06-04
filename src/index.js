@@ -44,14 +44,11 @@ async function handleAutocomplete() {
   }
 
   try {
-    const res = await fetch(`https://${process.env.RAPIDAPI_HOST}/food/ingredients/autocomplete?query=${query}&number=5`, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-        'x-rapidapi-host': process.env.RAPIDAPI_HOST
-      }
-    });
-    const suggestions = await res.json();
+    const suggestions = await fetchAutocompleteSuggestions(
+      query,
+      process.env.RAPIDAPI_KEY,
+      process.env.RAPIDAPI_HOST
+    );
     renderAutocompleteList(suggestions);
   } catch (err) {
     console.error('Autocomplete error:', err);
